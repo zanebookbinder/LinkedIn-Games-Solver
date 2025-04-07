@@ -31,6 +31,7 @@ class TangoSolver:
         self.board, self.left_right_transitions, self.up_down_transitions = (
             self.get_detailed_board(cells)
         )
+        self.starting_board = [[i for i in row] for row in self.board]
         print("Empty cells: ", self.empty_cell_count)
         print("Board: ", self.board)
         print("LR transitions: ", self.left_right_transitions)
@@ -269,35 +270,43 @@ class TangoSolver:
     def add_solved_board_to_site(self, driver):
 
         # ADD THREADING HERE
+        print("STARTING BOARAD")
+        self.print_board(self.starting_board)
+        to_click = []
+        actions = ActionChains(driver)
 
         # Loop through the solved board and click the corresponding lotka-cell
         for row in range(self.grid_size):
             for col in range(self.grid_size):
                 cell_value = self.board[row][col]
+                if self.starting_board[row][col] != TangoSolver.EMPTY:
+                    continue
 
                 cell_object = self.cells[col + row * self.grid_size]
 
                 # Determine whether to click once or twice based on the value (SUN or MOON)
                 if cell_value == TangoSolver.SUN:
                     print(f"Clicking once on cell ({row}, {col}) for SUN")
-                    cell_object.click()
-                    # ActionChains(driver).move_to_element(cell_object).click().perform()
+                    to_click.append(cell_object)
+                    actions.move_to_element(cell_object).click()
                 elif cell_value == TangoSolver.MOON:
                     print(f"Clicking twice on cell ({row}, {col}) for MOON")
-                    cell_object.click()
-                    cell_object.click()
-                    # ActionChains(driver).move_to_element(
-                    #     cell_object
-                    # ).click().click().perform()
+                    to_click.append(cell_object)
+                    to_click.append(cell_object)
+                    actions.move_to_element(cell_object).click().click()
 
-    def print_board(self):
-        grid_size = len(self.board)
+        actions.perform()
+
+    def print_board(self, board=None):
+        if not board:
+            board = self.board
+        grid_size = len(board)
 
         for row in range(grid_size):
             # Build the row of symbols
             row_str = ""
             for col in range(grid_size):
-                cell_value = self.board[row][col]
+                cell_value = board[row][col]
                 row_str += TangoSolver.symbol_map.get(cell_value, " ")
 
                 # Add horizontal edge (to the right)

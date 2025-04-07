@@ -6,9 +6,14 @@ from queens_solver import QueensSolver
 from zip_solver import ZipSolver
 import time
 
+
 class Solver:
 
-    game_to_solve_dict = {"Tango": TangoSolver, "Queens": QueensSolver, "Zip": ZipSolver}
+    game_to_solve_dict = {
+        "Tango": TangoSolver,
+        "Queens": QueensSolver,
+        "Zip": ZipSolver,
+    }
 
     def __init__(self):
         input_game = self.user_selects_game()
@@ -16,14 +21,28 @@ class Solver:
             print("Invalid game selected. Exiting...")
             exit(0)
 
+        start_time = time.time()
+
         game_url = Solver.game_to_solve_dict[input_game].game_url
         web_scraper = WebScraper(game_url)
         driver = web_scraper.get_driver()
+        game_solver = Solver.game_to_solve_dict[input_game](
+            driver
+        )  # gets board and transitions
 
-        game_solver = Solver.game_to_solve_dict[input_game](driver) # gets board and transitions
+        found_board_time = time.time()
+        print(f"Took {found_board_time - start_time} to find board data")
+
         game_solver.solve_game()
+
+        solved_game_time = time.time()
+        print(f"Took {solved_game_time - found_board_time} to solve game")
+
         game_solver.print_solved_game()
         game_solver.add_solved_board_to_site(driver)
+
+        added_solution_time = time.time()
+        print(f"Took {added_solution_time - solved_game_time} to add solution to site")
 
         time.sleep(100)
         web_scraper.quit_driver()
