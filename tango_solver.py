@@ -1,6 +1,5 @@
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
 from web_scraper import WebScraper
 import math
@@ -53,10 +52,11 @@ class TangoSolver:
             )
 
         print("⏳ Waiting for launch button...")
-        button = WebDriverWait(driver, 30).until(
-            EC.element_to_be_clickable((By.ID, "launch-footer-start-button"))
+        button = (
+            WebDriverWait(driver, 30)
+            .until(EC.element_to_be_clickable((By.ID, "launch-footer-start-button")))
+            .click()
         )
-        button.click()
         print("✅ Launch button clicked.")
 
         try:
@@ -247,7 +247,6 @@ class TangoSolver:
                 return True, i, icon_to_add
 
         # Rule 5: Minority outnumbered symbol at the edge must be pushed to the farthest cell
-
         if (
             row[:3].count(TangoSolver.EMPTY) == 0
             and row[3:6].count(TangoSolver.EMPTY) == 3
@@ -257,8 +256,9 @@ class TangoSolver:
                 icon_to_add = c
                 return True, len(row) - 1, icon_to_add
 
-        if row[-3:].count(TangoSolver.EMPTY) == 0 and row[-6:-3].count(
-            TangoSolver.EMPTY == 3
+        if (
+            row[3:].count(TangoSolver.EMPTY) == 0
+            and row[:3].count(TangoSolver.EMPTY) == 3
         ):
             a, b, c = row[-3], row[-2], row[-1]
             if b == c and a != c:
@@ -267,35 +267,56 @@ class TangoSolver:
 
         return False, 0, 0
 
-    def add_solved_board_to_site(self, driver):
-
-        # ADD THREADING HERE
-        print("STARTING BOARAD")
-        self.print_board(self.starting_board)
-        to_click = []
-        actions = ActionChains(driver)
-
-        # Loop through the solved board and click the corresponding lotka-cell
+    def add_solved_board_to_site(self):
         for row in range(self.grid_size):
             for col in range(self.grid_size):
-                cell_value = self.board[row][col]
                 if self.starting_board[row][col] != TangoSolver.EMPTY:
                     continue
 
+                cell_value = self.board[row][col]
                 cell_object = self.cells[col + row * self.grid_size]
 
-                # Determine whether to click once or twice based on the value (SUN or MOON)
-                if cell_value == TangoSolver.SUN:
-                    print(f"Clicking once on cell ({row}, {col}) for SUN")
-                    to_click.append(cell_object)
-                    actions.move_to_element(cell_object).click()
-                elif cell_value == TangoSolver.MOON:
-                    print(f"Clicking twice on cell ({row}, {col}) for MOON")
-                    to_click.append(cell_object)
-                    to_click.append(cell_object)
-                    actions.move_to_element(cell_object).click().click()
+                try:
+                    if cell_value == TangoSolver.SUN:
+                        cell_object.click()
+                    elif cell_value == TangoSolver.MOON:
+                        cell_object.click()
+                        cell_object.click()
+                except Exception as e:
+                    print(f"⚠️ Error clicking cell ({row}, {col}): {e}")
 
-        actions.perform()
+        return
+
+        def click_cell(cell_object, clicks, row, col):
+            try:
+                for _ in range(clicks):
+                    cell_object.click()
+            except Exception as e:
+                print(f"⚠️ Error clicking cell ({row}, {col}): {e}")
+
+        threads = []
+
+        for row in range(self.grid_size):
+            for col in range(self.grid_size):
+                if self.starting_board[row][col] != TangoSolver.EMPTY:
+                    continue
+
+                cell_value = self.board[row][col]
+                cell_object = self.cells[col + row * self.grid_size]
+
+                if cell_value == TangoSolver.MOON:
+                    t = threading.Thread(
+                        target=click_cell, args=(cell_object, 1, row, col)
+                    )
+                    threads.append(t)
+
+        # Start all threads
+        for thread in threads:
+            thread.start()
+
+        # Wait for all to complete
+        for thread in threads:
+            thread.join()
 
     def print_board(self, board=None):
         if not board:

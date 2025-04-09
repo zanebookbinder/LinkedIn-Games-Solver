@@ -2,7 +2,6 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 
-
 class WebScraper:
 
     def __init__(
@@ -12,18 +11,19 @@ class WebScraper:
         options.add_argument("--disable-blink-features=AutomationControlled")
         options.add_experimental_option("useAutomationExtension", False)
         options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        options.add_experimental_option("detach", True)
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--disable-gpu")  # Only for headless mode
+        options.add_argument("--disable-blink-features=AutomationControlled")
         if headless:
             options.add_argument("--headless")
         service = Service(chromedriver_path)
         self.driver = webdriver.Chrome(service=service, options=options)
-        self.driver.execute_script(
-            "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"
-        )
 
         self.open_url(game_url)
 
     def open_url(self, url):
-        url = "https://www.linkedin.com/games/tango/"
         self.driver.get(url)
 
     @staticmethod

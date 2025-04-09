@@ -39,7 +39,7 @@ class Solver:
         print(f"Took {solved_game_time - found_board_time} to solve game")
 
         game_solver.print_solved_game()
-        game_solver.add_solved_board_to_site(driver)
+        game_solver.add_solved_board_to_site()
 
         added_solution_time = time.time()
         print(f"Took {added_solution_time - solved_game_time} to add solution to site")
