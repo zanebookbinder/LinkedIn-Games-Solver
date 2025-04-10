@@ -6,10 +6,12 @@ import math
 from collections import defaultdict
 from enum import Enum
 
+
 class CellContents(Enum):
     EMPTY = 0
     QUEEN = 1
     X = 2
+
 
 class QueenCell:
     def __init__(self, color: int, contents: CellContents = CellContents.EMPTY):
@@ -19,6 +21,7 @@ class QueenCell:
 
     def set_starting_queen(self):
         self.starting_queen = True
+
 
 class QueensSolver:
     game_url = "https://www.linkedin.com/games/queens/"
@@ -35,8 +38,8 @@ class QueensSolver:
             for col in range(self.grid_size):
                 if self.board[row][col].contents == CellContents.QUEEN:
                     self.mark_x_squares(row, col)
+                    self.board[row][col].set_starting_queen()
                 region_id = self.board[row][col].color
-                self.board[row][col].set_starting_queen()
                 self.regions[region_id].add((row, col))
 
     def get_cells_and_regions(self):
@@ -100,7 +103,7 @@ class QueensSolver:
 
     def is_valid_placement(self, row, col):
         return not ((row, col) in self.x)
-        
+
         # Must not be adjacent to another queen
         for r in range(max(0, row - 1), min(self.grid_size, row + 2)):
             for c in range(max(0, col - 1), min(self.grid_size, col + 2)):
@@ -124,15 +127,14 @@ class QueensSolver:
         for r in range(max(0, row - 1), min(self.grid_size, row + 2)):
             for c in range(max(0, col - 1), min(self.grid_size, col + 2)):
                 if self.board[r][c].contents != CellContents.QUEEN:
-                    x.add((r,c))
+                    x.add((r, c))
 
         # Same row or column
         for r in range(len(self.board)):
             for c in range(len(self.board)):
                 if self.board[r][c].contents != CellContents.QUEEN:
-                    if self.board[r][c].color == cell_color or \
-                        r == row or c == col:
-                        x.add((r,c))
+                    if self.board[r][c].color == cell_color or r == row or c == col:
+                        x.add((r, c))
 
         self.x = self.x.union(x)
         return x
@@ -143,10 +145,10 @@ class QueensSolver:
     def solve_region(self, color_index):
         if color_index == len(self.regions):
             return True  # All regions filled
-        
+
         if self.has_queen(color_index):
             return self.solve_region(color_index + 1)
-        
+
         for row, col in self.regions[color_index]:
             if self.is_valid_placement(row, col):
                 self.board[row][col].contents = CellContents.QUEEN
@@ -163,7 +165,7 @@ class QueensSolver:
         for row, col in self.regions[color_index]:
             if self.board[row][col].contents == CellContents.QUEEN:
                 return True
-            
+
         return False
 
     def add_solved_board_to_site(self):
@@ -181,19 +183,17 @@ class QueensSolver:
     def print_board(self):
         print("Queen placements:")
         for row in range(len(self.board)):
-            row_str = ''
+            row_str = ""
             for col in range(len(self.board)):
                 cellContents = self.board[row][col].contents
                 if (row, col) in self.x:
-                    row_str += 'x '
+                    row_str += "x "
                 elif cellContents == CellContents.QUEEN:
-                    row_str += 'Q '
+                    row_str += "Q "
                 elif cellContents == CellContents.EMPTY:
-                    row_str += '. '
+                    row_str += ". "
 
-            print(
-                row_str
-            )
+            print(row_str)
 
         print("\n\n")
         print("Color map:")
