@@ -5,13 +5,12 @@ from selenium.common.exceptions import NoSuchElementException
 import math
 from collections import defaultdict
 from enum import Enum
-
+import time
 
 class CellContents(Enum):
     EMPTY = 0
     QUEEN = 1
     X = 2
-
 
 class QueenCell:
     def __init__(self, color: int, contents: CellContents = CellContents.EMPTY):
@@ -168,7 +167,9 @@ class QueensSolver:
 
         return False
 
-    def add_solved_board_to_site(self):
+    def add_solved_board_to_site(self, timeout=0):
+        if timeout:
+            time.sleep(timeout)
         for row in range(self.grid_size):
             for col in range(self.grid_size):
                 obj = self.board[row][col]

@@ -19,6 +19,7 @@ class ZipSolver:
     def __init__(self, driver):
         self.driver = driver
         self.board, self.walls = self.get_board_and_walls()
+        self.print_board()
 
     def get_board_and_walls(self):
         print("⏳ Setting up board...")
@@ -129,8 +130,13 @@ class ZipSolver:
 
                 for dx, dy in DIRS:
                     nx, ny = x + dx, y + dy
-                    if 0 <= nx < rows and 0 <= ny < cols:
-                        if (nx, ny) not in visited and (nx, ny) not in path and not self.is_blocked(wall_set, x, y, nx, ny):
+                    if 0 <= nx < rows and 0 <= ny < cols: # on the board
+                        # no overlaps from previous paths or this path, no walls,
+                        # not hitting a number (other than the one we want to hit)
+                        if (nx, ny) not in visited \
+                            and (nx, ny) not in path \
+                            and not self.is_blocked(wall_set, x, y, nx, ny) \
+                            and (self.board[nx][ny] == 0 or (nx, ny) == end):
                             queue.append(((nx, ny), path + [(nx, ny)]))
 
             return all_paths
@@ -229,7 +235,10 @@ class ZipSolver:
                         line += "    "
                 print(line)
 
-    def add_solved_board_to_site(self, delay=0):
+    def add_solved_board_to_site(self, delay=0, timeout=0):
+        if timeout:
+            time.sleep(timeout)
+        
         direction_keys = {
             (0, 1): Keys.ARROW_RIGHT,
             (0, -1): Keys.ARROW_LEFT,

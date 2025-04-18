@@ -1,11 +1,11 @@
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from web_scraper import WebScraper
+from .web_scraper import WebScraper
 import math
 from collections import Counter
 import threading
-
+import time
 
 class TangoSolver:
     game_url = "https://www.linkedin.com/games/tango/"
@@ -166,7 +166,7 @@ class TangoSolver:
                 return
 
         print("Could not find anywhere to add an icon. Exiting...")
-        exit(0)
+        time.sleep(1000)
 
     def find_cell_to_update(self, row, transitions):
         max_count = self.grid_size // 2
@@ -265,9 +265,36 @@ class TangoSolver:
                 icon_to_add = a
                 return True, 0, icon_to_add
 
+        # Rule 6: Three symbols filled in on the edge and two x between the remaining three
+        # Ex. XOX_x_x_ OR OXO_x_x_
+        if (row[:3].count(TangoSolver.EMPTY) == 0
+            and row[3:].count(TangoSolver.EMPTY == 3)
+            and transitions[3] == TangoSolver.DIFFERENT
+            and transitions[4] == TangoSolver.DIFFERENT):
+            count_suns = row[:3].count(TangoSolver.SUN)
+            count_moons = row[:3].count(TangoSolver.MOON)
+
+            if (count_suns < count_moons):
+                return True, 3, TangoSolver.SUN
+            return True, 3, TangoSolver.MOON
+        
+        if (row[:3].count(TangoSolver.EMPTY) == 3
+            and row[3:].count(TangoSolver.EMPTY == 0)
+            and transitions[0] == TangoSolver.DIFFERENT
+            and transitions[1] == TangoSolver.DIFFERENT):
+
+            count_suns = row[3:].count(TangoSolver.SUN)
+            count_moons = row[3:].count(TangoSolver.MOON)
+
+            if (count_suns < count_moons):
+                return True, 2, TangoSolver.SUN
+            return True, 2, TangoSolver.MOON
+
         return False, 0, 0
 
-    def add_solved_board_to_site(self):
+    def add_solved_board_to_site(self, timeout=0):
+        if timeout:
+            time.sleep(timeout)
         for row in range(self.grid_size):
             for col in range(self.grid_size):
                 if self.starting_board[row][col] != TangoSolver.EMPTY:
