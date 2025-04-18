@@ -4,6 +4,8 @@ A Python package designed to solve LinkedIn's puzzle games, including Tango, Que
 
 Uses Selenium to open a Safari browser, read today's game board, solve it, and input the correct answer.
 
+Find the package on PyPi here: https://pypi.org/project/linkedin-games-solver/
+
 ## Usage
 
 Install package: `pip install linkedin-games-solver`
