@@ -19,7 +19,6 @@ class ZipSolver:
     def __init__(self, driver):
         self.driver = driver
         self.board, self.walls = self.get_board_and_walls()
-        self.print_board()
 
     def get_board_and_walls(self):
         print("⏳ Setting up board...")
