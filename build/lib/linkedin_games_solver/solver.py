@@ -1,9 +1,9 @@
 from readchar import readkey, key
 from rich.console import Console
-from web_scraper import WebScraper
-from tango_solver import TangoSolver
-from queens_solver import QueensSolver
-from zip_solver import ZipSolver
+from .web_scraper import WebScraper
+from .tango_solver import TangoSolver
+from .queens_solver import QueensSolver
+from .zip_solver import ZipSolver
 import time
 
 class Solver:
@@ -93,6 +93,6 @@ class Solver:
 
 def main():
     Solver()
-    
+
 if __name__ == "__main__":
     main()
